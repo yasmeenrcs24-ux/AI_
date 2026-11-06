@@ -1,0 +1,37 @@
+import random
+import math
+
+N = 8
+
+def cost(b):
+    h = 0
+    for i in range(N):
+        for j in range(i + 1, N):
+            if b[i] == b[j] or abs(b[i] - b[j]) == j - i:
+                h += 1
+    return h
+
+b = list(map(int, input("Enter 8 numbers (0-7): ").split()))
+
+T = 10
+
+while T > 0.001 and cost(b) != 0:
+    c = random.randrange(N)
+    old = b[c]
+    h = cost(b)
+
+    b[c] = random.choice([r for r in range(N) if r != old])
+    d = cost(b) - h
+
+    if d > 0 and random.random() >= math.exp(-d / T):
+        b[c] = old
+
+    T *= 0.995
+
+print("Board:")
+for r in range(N):
+    for c in range(N):
+        print("Q" if b[c] == r else ".", end=" ")
+    print()
+
+print("Cost:", cost(b))
