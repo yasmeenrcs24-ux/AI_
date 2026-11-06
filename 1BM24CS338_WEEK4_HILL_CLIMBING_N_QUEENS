@@ -1,0 +1,50 @@
+
+import random
+
+def cost(b):
+    n = len(b)
+    return sum(
+        b[i] == b[j] or abs(b[i] - b[j]) == j - i
+        for i in range(n)
+        for j in range(i + 1, n)
+    )
+
+def hill_climbing():
+    N = int(input("Enter N: "))
+    b = list(map(int, input("Enter initial board: ").split()))
+
+    if len(b) != N or any(r < 0 or r >= N for r in b):
+        print("Invalid input!")
+        return
+
+    i = 1
+
+    while True:
+        h = cost(b)
+        print("Step", i, ":", b, "Cost =", h)
+
+        if h == 0:
+            print("Solution found:", b)
+            return
+
+        neighbors = []
+
+        for c in range(N):
+            for r in range(N):
+                if r != b[c]:
+                    x = b[:]
+                    x[c] = r
+                    neighbors.append(x)
+
+        best = min(neighbors, key=cost)
+        print("Best neighbor:", best, "Cost =", cost(best))
+
+        if cost(best) >= h:
+            print("Local minimum! Restarting...")
+            b = [random.randrange(N) for _ in range(N)]
+        else:
+            b = best
+
+        i += 1
+
+hill_climbing()
