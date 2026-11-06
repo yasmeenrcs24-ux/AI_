@@ -1,0 +1,68 @@
+
+def pl_true(expr, model):
+    P = model['P']
+    Q = model['Q']
+    R = model['R']
+
+    if expr == 'Q_IMPLIES_P':
+        return (not Q) or P
+
+    if expr == 'P_IMPLIES_NOT_Q':
+        return (not P) or (not Q)
+
+    if expr == 'Q_OR_R':
+        return Q or R
+
+    if expr == 'KB':
+        return ((not Q) or P) and \
+               ((not P) or (not Q)) and \
+               (Q or R)
+
+    if expr == 'R':
+        return R
+
+    if expr == 'R_IMPLIES_P':
+        return (not R) or P
+
+    if expr == 'Q_IMPLIES_R':
+        return (not Q) or R
+
+    return False
+
+
+def tt_entails():
+    symbols = ['P', 'Q', 'R']
+
+    queries = ['R', 'R_IMPLIES_P', 'Q_IMPLIES_R']
+
+    results = {query: True for query in queries}
+
+    for p in [True, False]:
+        for q in [True, False]:
+            for r in [True, False]:
+
+                model = {'P': p, 'Q': q, 'R': r}
+
+                kb = pl_true('KB', model)
+
+                print("\nModel:", model, "KB:", kb)
+
+                if kb:
+                    for query in queries:
+                        value = pl_true(query, model)
+
+                        print(query, ":", value)
+
+                        if not value:
+                            results[query] = False
+
+    print("\n========== FINAL RESULTS ==========")
+
+    for query in queries:
+        if results[query]:
+            print("KB entails", query)
+        else:
+            print("KB does NOT entail", query)
+
+
+tt_entails()
