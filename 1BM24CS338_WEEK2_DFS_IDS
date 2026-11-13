@@ -1,0 +1,102 @@
+
+def get_neighbors(state):
+    i = state.index(0)
+    moves = []
+
+    if i >= 3:
+        moves.append(i - 3)
+    if i < 6:
+        moves.append(i + 3)
+    if i % 3 != 0:
+        moves.append(i - 1)
+    if i % 3 != 2:
+        moves.append(i + 1)
+
+    result = []
+
+    for j in moves:
+        new = list(state)
+        new[i], new[j] = new[j], new[i]
+        result.append(tuple(new))
+
+    return result
+
+
+# DFS Algorithm
+def dfs(start, goal):
+    stack = [(start, [start])]
+    visited = {start}
+
+    while stack:
+        state, path = stack.pop()
+
+        if state == goal:
+            return path
+
+        for new in get_neighbors(state):
+            if new not in visited:
+                visited.add(new)
+                stack.append((new, path + [new]))
+
+    return None
+
+
+# Depth Limited Search
+def dls(state, goal, depth, path):
+    if state == goal:
+        return path
+
+    if depth == 0:
+        return None
+
+    for new in get_neighbors(state):
+        if new not in path:
+            result = dls(new, goal, depth - 1, path + [new])
+
+            if result:
+                return result
+
+    return None
+
+
+# IDS Algorithm
+def ids(start, goal):
+    for depth in range(32):
+        result = dls(start, goal, depth, [start])
+
+        if result:
+            return result
+
+    return None
+
+
+# Main Program
+start = tuple(map(int, input("Enter initial state: ").split()))
+goal = tuple(map(int, input("Enter goal state: ").split()))
+
+if len(start) != 9 or len(goal) != 9 or set(start) != set(range(9)) or set(goal) != set(range(9)):
+    print("Invalid input")
+else:
+    print("\n1. DFS")
+    print("2. IDS")
+
+    choice = int(input("Enter your choice: "))
+
+    if choice == 1:
+        result = dfs(start, goal)
+    elif choice == 2:
+        result = ids(start, goal)
+    else:
+        result = None
+        print("Invalid choice")
+
+    if result:
+        print("\nSolution found!")
+        print("Number of moves:", len(result) - 1)
+
+        for state in result:
+            print()
+            for i in range(0, 9, 3):
+                print(state[i:i+3])
+    elif choice in [1, 2]:
+        print("No solution found")
