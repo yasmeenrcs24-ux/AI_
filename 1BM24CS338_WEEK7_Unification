@@ -1,0 +1,92 @@
+
+def is_variable(x):
+    return isinstance(x, str) and len(x) == 1 and x.islower()
+
+def parse(s):
+    s = s.strip()
+
+    if '(' not in s:
+        return s
+
+    name, args = s.split('(', 1)
+    args = args[:-1]
+
+    result = []
+    level = 0
+    temp = ""
+
+    for ch in args:
+        if ch == ',' and level == 0:
+            result.append(parse(temp))
+            temp = ""
+        else:
+            if ch == '(':
+                level += 1
+            elif ch == ')':
+                level -= 1
+            temp += ch
+
+    if temp:
+        result.append(parse(temp))
+
+    return (name.strip(), result)
+
+
+def apply(term, subst):
+    if isinstance(term, str):
+        while term in subst:
+            term = subst[term]
+        return term
+
+    return (term[0], [apply(x, subst) for x in term[1]])
+
+
+def unify(a, b, subst):
+    a = apply(a, subst)
+    b = apply(b, subst)
+
+    if a == b:
+        return subst
+
+    if is_variable(a):
+        subst[a] = b
+        return subst
+
+    if is_variable(b):
+        subst[b] = a
+        return subst
+
+    if isinstance(a, tuple) and isinstance(b, tuple):
+        if a[0] != b[0] or len(a[1]) != len(b[1]):
+            return None
+
+        for x, y in zip(a[1], b[1]):
+            subst = unify(x, y, subst)
+
+            if subst is None:
+                return None
+
+        return subst
+
+    return None
+
+
+e1 = input("Enter first expression: ")
+e2 = input("Enter second expression: ")
+
+a = parse(e1)
+b = parse(e2)
+
+if not isinstance(a, tuple) or not isinstance(b, tuple):
+    print("Unification Failed")
+else:
+    result = unify(a, b, {})
+
+    if result is None:
+        print("Unification Failed")
+    else:
+        print("Unification Successful")
+        print("Substitution:")
+
+        for x, y in result.items():
+            print(x, "=", y)
