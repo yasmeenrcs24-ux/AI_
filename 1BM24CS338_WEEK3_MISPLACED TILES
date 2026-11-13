@@ -1,0 +1,78 @@
+
+
+import heapq
+
+def misplaced(state, goal):
+    count = 0
+    for i in range(9):
+        if state[i] != 0 and state[i] != goal[i]:
+            count += 1
+    return count
+
+
+def astar(start, goal):
+    pq = []
+    heapq.heappush(pq, (misplaced(start, goal), 0, start, [start]))
+
+    visited = {}
+
+    while pq:
+        f, g, state, path = heapq.heappop(pq)
+
+        if state == goal:
+            return path
+
+        if state in visited and visited[state] <= g:
+            continue
+
+        visited[state] = g
+
+        zero = state.index(0)
+
+        moves = []
+        if zero >= 3:
+            moves.append(zero - 3)
+        if zero < 6:
+            moves.append(zero + 3)
+        if zero % 3 != 0:
+            moves.append(zero - 1)
+        if zero % 3 != 2:
+            moves.append(zero + 1)
+
+        for i in moves:
+            new = list(state)
+            new[zero], new[i] = new[i], new[zero]
+            new = tuple(new)
+
+            new_g = g + 1
+            new_h = misplaced(new, goal)
+            new_f = new_g + new_h
+
+            heapq.heappush(pq, (new_f, new_g, new, path + [new]))
+
+    return None
+
+
+start = tuple(map(int, input("Enter initial state: ").split()))
+goal = tuple(map(int, input("Enter goal state: ").split()))
+
+if len(start) != 9 or len(goal) != 9 or set(start) != set(range(9)) or set(goal) != set(range(9)):
+    print("Invalid input")
+else:
+    result = astar(start, goal)
+
+    if result:
+        print("\nSolution found!")
+        print("Number of moves:", len(result) - 1)
+
+        for state in result:
+            for i in range(0, 9, 3):
+                print(state[i:i+3])
+            print()
+    else:
+        print("No solution found")
+
+
+
+
+
